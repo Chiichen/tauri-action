@@ -152,6 +152,7 @@ async function run(): Promise<void> {
           artifacts:
             releaseArtifacts.length !== 0 ? releaseArtifacts : debugArtifacts,
           targetInfo,
+          unzippedSig: info.unzippedSigs,
           updaterJsonPreferNsis,
           updaterJsonKeepUniversal,
         });
