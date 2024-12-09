@@ -1,5 +1,17 @@
 # Changelog
 
+## \[0.5.16]
+
+- [`acdef25`](https://www.github.com/tauri-apps/tauri-action/commit/acdef251b8450d568e025c512753e61ef582fa8f) ([#949](https://www.github.com/tauri-apps/tauri-action/pull/949) by [@FabianLars](https://www.github.com/tauri-apps/tauri-action/../../FabianLars)) The action will now set `TAURI_BUNDLER_DMG_IGNORE_CI: true` by default on tauri cli versions 2.2.0 and above. See https://github.com/tauri-apps/tauri-action/issues/740 for context. This can be disabled by explicitly setting `TAURI_BUNDLER_DMG_IGNORE_CI: false` yourself.
+
+## \[0.5.15]
+
+- [`f575715`](https://www.github.com/tauri-apps/tauri-action/commit/f575715ef970f081f9942c4867a8657d6d6dbfc1) ([#929](https://www.github.com/tauri-apps/tauri-action/pull/929) by [@FabianLars](https://www.github.com/tauri-apps/tauri-action/../../FabianLars)) The action will now try to check for the tauri version before installing the tauri cli fallback (if no tauri cli was found) instead of always installing the latest stable version.
+
+## \[0.5.14]
+
+- [`9387d95`](https://www.github.com/tauri-apps/tauri-action/commit/9387d95d400af0a0c6c4199962a962e93d13cb4d) ([#908](https://www.github.com/tauri-apps/tauri-action/pull/908) by [@FabianLars](https://www.github.com/tauri-apps/tauri-action/../../FabianLars)) The action will now only use the signature file for unzipped bundles if `createUpdaterArtifacts` in tauri.conf.json is set to `true`.
+
 ## \[0.5.13]
 
 - [`3b72cab`](https://www.github.com/tauri-apps/tauri-action/commit/3b72cab93fb2fbac61fc5b91cbede2fee647dd82) ([#893](https://www.github.com/tauri-apps/tauri-action/pull/893) by [@Muska-Ami](https://www.github.com/tauri-apps/tauri-action/../../Muska-Ami)) Use Bun for the build when the `bun.locb` file is found.

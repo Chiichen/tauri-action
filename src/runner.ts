@@ -1,5 +1,7 @@
+import { TauriConfig } from './config';
 import {
   execCommand,
+  getTauriDir,
   hasDependency,
   usesBun,
   usesPnpm,
@@ -21,6 +23,7 @@ class Runner {
     command: string[],
     commandOptions: string[],
     cwd?: string,
+    env?: Record<string, string>,
   ): Promise<void> {
     const args: string[] = [];
 
@@ -38,7 +41,7 @@ class Runner {
 
     args.push(...commandOptions);
 
-    return execCommand(this.bin, args, { cwd });
+    return execCommand(this.bin, args, { cwd }, env);
   }
 }
 
@@ -59,7 +62,23 @@ async function getRunner(
     return new Runner('npm', ['run', 'tauri']);
   }
 
-  await execCommand('npm', ['install', '-g', '@tauri-apps/cli'], {
+  // TODO: Change to v2 after a while.
+  let tag = 'v1';
+
+  try {
+    const tauriDir = getTauriDir(root);
+    if (tauriDir) {
+      const baseConf = TauriConfig.fromBaseConfig(tauriDir);
+
+      if (baseConf && baseConf.isV2()) {
+        tag = 'v2';
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  await execCommand('npm', ['install', '-g', `@tauri-apps/cli@${tag}`], {
     cwd: undefined,
   });
 
