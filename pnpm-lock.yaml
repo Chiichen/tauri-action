@@ -17,9 +17,6 @@ importers:
       '@iarna/toml':
         specifier: 2.2.5
         version: 2.2.5
-      '@octokit/request-error':
-        specifier: ^6.1.5
-        version: 6.1.5
       execa:
         specifier: 9.5.2
         version: 9.5.2
@@ -250,10 +247,6 @@ packages:
 
   '@octokit/request-error@5.1.0':
     resolution: {integrity: sha512-GETXfE05J0+7H2STzekpKObFe765O5dlAKUTLNGeH+x47z7JjXHfsHKo5z21D/o/IOZTUEI6nyWyR+bZVP/n5Q==}
-    engines: {node: '>= 18'}
-
-  '@octokit/request-error@6.1.5':
-    resolution: {integrity: sha512-IlBTfGX8Yn/oFPMwSfvugfncK2EwRLjzbrpifNaMY8o/HTEAFqCA1FZxjD9cWvSKBHgrIhc4CSBIzMxiLsbzFQ==}
     engines: {node: '>= 18'}
 
   '@octokit/request@8.4.0':
@@ -1304,17 +1297,18 @@ snapshots:
       picocolors: 1.1.1
       sisteransi: 1.0.5
 
-  '@covector/apply@0.10.0':
+  '@covector/apply@0.10.0(mocha@10.4.0)':
     dependencies:
       '@covector/files': 0.8.0
       effection: 2.0.8(mocha@10.4.0)
       semver: 7.6.3
     transitivePeerDependencies:
       - encoding
+      - mocha
 
-  '@covector/assemble@0.12.0(mocha@10.4.0)':
+  '@covector/assemble@0.12.0':
     dependencies:
-      '@covector/command': 0.8.0(mocha@10.4.0)
+      '@covector/command': 0.8.0
       '@covector/files': 0.8.0
       effection: 2.0.8(mocha@10.4.0)
       js-yaml: 4.1.0
@@ -1325,7 +1319,6 @@ snapshots:
       unified: 9.2.2
     transitivePeerDependencies:
       - encoding
-      - mocha
       - supports-color
 
   '@covector/changelog@0.12.0':
@@ -1340,13 +1333,12 @@ snapshots:
       - encoding
       - supports-color
 
-  '@covector/command@0.8.0(mocha@10.4.0)':
+  '@covector/command@0.8.0':
     dependencies:
       '@effection/process': 2.1.4
       effection: 2.0.8(mocha@10.4.0)
     transitivePeerDependencies:
       - encoding
-      - mocha
 
   '@covector/files@0.8.0':
     dependencies:
@@ -1524,10 +1516,6 @@ snapshots:
       '@octokit/types': 13.6.2
       deprecation: 2.3.1
       once: 1.4.0
-
-  '@octokit/request-error@6.1.5':
-    dependencies:
-      '@octokit/types': 13.6.2
 
   '@octokit/request@8.4.0':
     dependencies:
@@ -1759,10 +1747,10 @@ snapshots:
   covector@0.12.3(mocha@10.4.0):
     dependencies:
       '@clack/prompts': 0.7.0
-      '@covector/apply': 0.10.0
-      '@covector/assemble': 0.12.0(mocha@10.4.0)
+      '@covector/apply': 0.10.0(mocha@10.4.0)
+      '@covector/assemble': 0.12.0
       '@covector/changelog': 0.12.0
-      '@covector/command': 0.8.0(mocha@10.4.0)
+      '@covector/command': 0.8.0
       '@covector/files': 0.8.0
       effection: 2.0.8(mocha@10.4.0)
       globby: 11.1.0

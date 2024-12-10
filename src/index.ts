@@ -2,17 +2,16 @@ import { existsSync } from 'node:fs';
 import { resolve, dirname, basename } from 'node:path';
 
 import * as core from '@actions/core';
-import { context, getOctokit } from '@actions/github';
+import { context } from '@actions/github';
 import stringArgv from 'string-argv';
 
-import { createRelease } from './create-release';
+import { getOrCreateRelease } from './create-release';
 import { uploadAssets as uploadReleaseAssets } from './upload-release-assets';
 import { uploadVersionJSON } from './upload-version-json';
 import { buildProject } from './build';
 import { execCommand, getInfo, getTargetInfo } from './utils';
 
 import type { Artifact, BuildOptions, InitOptions } from './types';
-import { RequestError } from '@octokit/request-error';
 
 async function run(): Promise<void> {
   try {
@@ -102,7 +101,7 @@ async function run(): Promise<void> {
     const artifacts = releaseArtifacts.concat(debugArtifacts);
 
     if (artifacts.length === 0) {
-      if (releaseId || tagName || releaseName) {
+      if (releaseId || tagName) {
         throw new Error('No artifacts were found.');
       } else {
         console.log(
@@ -151,11 +150,45 @@ async function run(): Promise<void> {
         i++;
       }
     }
-    const uploadReleaseAndVersionJSON = async () => {
-      console.log(`Uploading assets to release ${releaseId}...`);
+
+    // If releaseId is set we'll use this to upload the assets to.
+    // If tagName is set we will try to upload assets to the release associated with the given tagName.
+    // If there's no release for that tag, we require releaseName to create a new one.
+    if (tagName && !releaseId) {
+      const templates = [
+        {
+          key: '__VERSION__',
+          value: info.version,
+        },
+      ];
+
+      templates.forEach((template) => {
+        const regex = new RegExp(template.key, 'g');
+        tagName = tagName.replace(regex, template.value);
+        releaseName = releaseName.replace(regex, template.value);
+        body = body.replace(regex, template.value);
+      });
+
+      const releaseData = await getOrCreateRelease(
+        owner,
+        repo,
+        tagName,
+        releaseName || undefined,
+        body,
+        commitish || undefined,
+        draft,
+        prerelease,
+      );
+      releaseId = releaseData.id;
+      core.setOutput('releaseUploadUrl', releaseData.uploadUrl);
+      core.setOutput('releaseId', releaseData.id.toString());
+      core.setOutput('releaseHtmlUrl', releaseData.htmlUrl);
+    }
+
+    if (releaseId) {
       await uploadReleaseAssets(owner, repo, releaseId, artifacts);
+
       if (includeUpdaterJson) {
-        console.log(`Uploading version.json to release ${releaseId}...`);
         await uploadVersionJSON({
           owner,
           repo,
@@ -171,79 +204,8 @@ async function run(): Promise<void> {
           updaterJsonKeepUniversal,
         });
       }
-    };
-    // If neither releaseId nor tagName are set we won't try to upload anything at the end.
-    // If releaseId is set we'll use this to upload the assets to.
-    // If tagName is set we will try to upload assets to the release associated with the given tagName. If failed, we require releaseName to create a new release.
-    if (!releaseId && !tagName) {
-      console.log('No releaseId or tagName provided, skipping all uploads...');
-      return;
-    }
-    if (releaseId) {
-      // If releaseId is set, upload assets to target release
-      await uploadReleaseAndVersionJSON();
     } else {
-      // If tagName is set, try to upload assets to the release associated with the given tagName. If failed, create a new release then
-      // Try to get releaseId through tagName. If not found, create the release then
-      if (process.env.GITHUB_TOKEN === undefined) {
-        throw new Error('GITHUB_TOKEN is required');
-      }
-      // Get authenticated GitHub client (Ocktokit): https://github.com/actions/toolkit/tree/master/packages/github#usage
-      const github = getOctokit(process.env.GITHUB_TOKEN);
-      try {
-        const foundRelease = await github.rest.repos.getReleaseByTag({
-          owner,
-          repo,
-          tag: tagName,
-        });
-        const release = foundRelease.data;
-        releaseId = release.id;
-        console.log(`Found release ${release.id} with tag ${tagName}.`);
-        await uploadReleaseAndVersionJSON();
-        return;
-      } catch (error: unknown) {
-        if (error instanceof RequestError && error.status === 404) {
-          core.info(`Release ${tagName} not found`);
-        } else {
-          throw error;
-        }
-      }
-
-      if (!releaseName) {
-        throw new Error(
-          '`releaseName` is required if `tagName` is set when creating a release.',
-        );
-      }
-      // If releaseName is specified and there no existing release for tagName, create a release then
-      const templates = [
-        {
-          key: '__VERSION__',
-          value: info.version,
-        },
-      ];
-
-      templates.forEach((template) => {
-        const regex = new RegExp(template.key, 'g');
-        tagName = tagName.replace(regex, template.value);
-        releaseName = releaseName.replace(regex, template.value);
-        body = body.replace(regex, template.value);
-      });
-
-      const releaseData = await createRelease(
-        owner,
-        repo,
-        tagName,
-        releaseName,
-        body,
-        commitish || undefined,
-        draft,
-        prerelease,
-      );
-      releaseId = releaseData.id;
-      core.setOutput('releaseUploadUrl', releaseData.uploadUrl);
-      core.setOutput('releaseId', releaseData.id.toString());
-      core.setOutput('releaseHtmlUrl', releaseData.htmlUrl);
-      await uploadReleaseAndVersionJSON();
+      console.log('No releaseId or tagName provided, skipping all uploads...');
     }
   } catch (error) {
     // @ts-expect-error Catching errors in typescript is a headache
