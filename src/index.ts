@@ -157,8 +157,7 @@ async function run(): Promise<void> {
           updaterJsonKeepUniversal,
         });
       }
-
-    }
+    };
     // If neither releaseId nor tagName are set we won't try to upload anything at the end.
     // If releaseId is set we'll use this to upload the assets to.
     // If tagName is set we will try to upload assets to the release associated with the given tagName. If failed, we require releaseName to create a new release.
@@ -190,9 +189,9 @@ async function run(): Promise<void> {
         return;
       } catch (error: unknown) {
         if (error instanceof RequestError && error.status === 404) {
-          core.info(`Release ${tagName} not found`)
+          core.info(`Release ${tagName} not found`);
         } else {
-          throw error
+          throw error;
         }
       }
 
